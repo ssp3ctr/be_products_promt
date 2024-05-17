@@ -2,7 +2,7 @@ from typing import List
 from fastapi import APIRouter, HTTPException, Query, Depends
 from app.models.api_models import Order
 from app.crud.orders import create_order, read_order, update_order, delete_order, get_all_orders
-from app.api.endpoints.generic import GenericCRUD
+from app.crud.generic import GenericCRUD
 from app.database import Database
 
 router = APIRouter()
