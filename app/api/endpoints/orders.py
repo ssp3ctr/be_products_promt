@@ -25,15 +25,9 @@ async def list_orders(skip: int = 0, limit: int = 10, sort_field: str = None, so
     return await crud.retrieve({}, skip=skip, limit=limit, sort_field=sort_field, sort_direction=sort_direction)
 
 @router.put("/{order_id}", response_model=Order)
-async def update_order_endpoint(order_id: str, order: Order):
-    updated_order = await update_order(order_id, order)
-    if not updated_order:
-        raise HTTPException(status_code=404, detail="Order not found")
-    return updated_order
+async def update_order(order_id: str, order_data: dict, crud: GenericCRUD = Depends(get_order_crud)):
+    return await crud.update({"id": order_id}, order_data)
 
 @router.delete("/{order_id}")
-async def delete_order_endpoint(order_id: str):
-    success = await delete_order(order_id)
-    if not success:
-        raise HTTPException(status_code=404, detail="Order not found")
-    return {"status": "deleted"}
+async def delete_order(order_id: str, crud: GenericCRUD = Depends(get_order_crud)):
+    return await crud.delete({"id": order_id})
