@@ -8,7 +8,7 @@ app.add_middleware(LocaleMiddleware)
 
 @app.on_event("startup")
 async def startup_event():
-    await Database.connect("mongodb://localhost:27017")
+    await Database.connect()
 
 @app.on_event("shutdown")
 async def shutdown_event():
