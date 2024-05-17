@@ -1,5 +1,6 @@
 from pymongo.errors import DuplicateKeyError
 from fastapi import HTTPException
+from bson import ObjectId
 
 class GenericCRUD:
     def __init__(self, collection):
@@ -44,3 +45,28 @@ class GenericCRUD:
         """Deletes a document and returns True if the operation was successful."""
         result = await self.collection.delete_one(query)
         return result.deleted_count > 0
+
+
+class DictionaryGenericCRUD:
+    def __init__(self, db, collection_name):
+        self.collection = db[collection_name]
+
+    async def create(self, data):
+        result = await self.collection.insert_one(data)
+        if result.acknowledged:
+            data['_id'] = str(result.inserted_id)
+            return {"status": "Item created", "id": str(result.inserted_id)}
+        raise Exception("Failed to create item")
+
+    async def retrieve(self, item_id):
+        result = await self.collection.find_one({"_id": ObjectId(item_id)})
+        return result
+
+    async def update(self, item_id, data):
+        result = await self.collection.update_one({"_id": ObjectId(item_id)}, {"$set": data})
+        return result
+
+    async def delete(self, item_id):
+        return await self.collection.delete_one({"_id": ObjectId(item_id)})
+    
+    
