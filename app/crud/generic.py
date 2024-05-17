@@ -23,8 +23,13 @@ class GenericCRUD:
         documents = await cursor.to_list(length=limit)
         return documents
 
-    async def read_order(self, query):
-        """Retrieve a single document by query."""
+    async def read(self, query):
+        """Retrieve a single y query."""
+        document = await self.collection.find_one(query)
+        return document
+    
+    async def specific_read(self, query):
+        """specific_read a single document by query."""
         document = await self.collection.find_one(query)
         return document
 

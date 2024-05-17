@@ -1,9 +1,9 @@
 from typing import List
-from fastapi import APIRouter, HTTPException, Query, Depends
+from fastapi import APIRouter, Depends
 from app.models.api_models import Order
-from app.crud.orders import create_order, read_order, update_order, delete_order, get_all_orders
 from app.crud.generic import GenericCRUD
 from app.database import Database
+from app.crud.orders import read_order
 
 router = APIRouter()
 
@@ -18,7 +18,17 @@ async def create_order(order_data: dict, crud: GenericCRUD = Depends(get_order_c
 
 @router.get("/{order_id}", response_model=Order)
 async def get_order(order_id: str, crud: GenericCRUD = Depends(get_order_crud)):
-    return await crud.read_order({"id": order_id})
+    return await crud.read({"id": order_id})
+
+# specific method from generic
+@router.get("/specific_read_generic/{customer_id}", response_model=Order)
+async def get_order(customer_id: str, crud: GenericCRUD = Depends(get_order_crud)):
+    return await crud.specific_read({"customer_id": customer_id})
+
+# specific method from ourders crud
+@router.get("/specific_read/{customer_id}", response_model=Order)
+async def get_order(customer_id: str, crud: GenericCRUD = Depends(get_order_crud)):
+    return await read_order({"customer_id": customer_id})
 
 @router.get("/", response_model=List[Order])
 async def list_orders(skip: int = 0, limit: int = 10, sort_field: str = None, sort_direction: int =1, crud: GenericCRUD = Depends(get_order_crud)):
