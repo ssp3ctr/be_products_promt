@@ -7,15 +7,28 @@ class GenericCRUD:
         self.collection = collection
 
     async def create(self, data):
-        """Create a document and handle duplicate key error."""
         try:
             result = await self.collection.insert_one(data)
-            return result.inserted_id
+            if result.acknowledged:
+                data['_id'] = str(result.inserted_id)
+                return data
+            else:
+                raise HTTPException(status_code=500, detail="Failed to create item")
         except DuplicateKeyError:
             raise HTTPException(status_code=400, detail="Document with this ID already exists")
 
+    async def read_by_id(self, item_id):
+        document = await self.collection.find_one({"_id": ObjectId(item_id)})
+        if not document:
+            raise HTTPException(status_code=404, detail="Item not found")
+        document['_id'] = str(document['_id'])
+        return document
+    
+    async def read(self, query):
+        document = await self.collection.find_one(query)
+        return document
+    
     async def retrieve(self, query, skip=0, limit=10, sort_field=None, sort_direction=1):
-        """Retrieve documents with optional sorting and pagination."""
         sort_criteria = [(sort_field, sort_direction)] if sort_field else None
         cursor = self.collection.find(query)
         if sort_criteria:
@@ -24,49 +37,18 @@ class GenericCRUD:
         documents = await cursor.to_list(length=limit)
         return documents
 
-    async def read(self, query):
-        """Retrieve a single y query."""
-        document = await self.collection.find_one(query)
-        return document
-    
-    async def specific_read(self, query):
-        """specific_read a single document by query."""
-        document = await self.collection.find_one(query)
-        return document
-
-    async def update(self, query, update_data):
-        """Update a document and return the updated document."""
-        update_result = await self.collection.update_one(query, {"$set": update_data})
+    async def update(self, item_id, update_data):
+        update_result = await self.collection.update_one({"_id": ObjectId(item_id)}, {"$set": update_data})
         if update_result.modified_count == 0:
-            return None
-        return await self.find_one(query)
-
-    async def delete(self, query):
-        """Deletes a document and returns True if the operation was successful."""
-        result = await self.collection.delete_one(query)
-        return result.deleted_count > 0
-
-
-class DictionaryGenericCRUD:
-    def __init__(self, db, collection_name):
-        self.collection = db[collection_name]
-
-    async def create(self, data):
-        result = await self.collection.insert_one(data)
-        if result.acknowledged:
-            data['_id'] = str(result.inserted_id)
-            return {"status": "Item created", "id": str(result.inserted_id)}
-        raise Exception("Failed to create item")
-
-    async def retrieve(self, item_id):
-        result = await self.collection.find_one({"_id": ObjectId(item_id)})
-        return result
-
-    async def update(self, item_id, data):
-        result = await self.collection.update_one({"_id": ObjectId(item_id)}, {"$set": data})
-        return result
+            raise HTTPException(status_code=404, detail="No updates made or item not found")
+        return await self.retrieve(item_id)
 
     async def delete(self, item_id):
-        return await self.collection.delete_one({"_id": ObjectId(item_id)})
+        result = await self.collection.delete_one({"_id": ObjectId(item_id)})
+        if result.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="Item not found")
+        return {"status": "Item deleted", "id": str(item_id)}
     
-    
+class DictionaryGenericCRUD(GenericCRUD):
+    def __init__(self, db, collection_name):
+        super().__init__(db[f"dictionaries_{collection_name}"])
