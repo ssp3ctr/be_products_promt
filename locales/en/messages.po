@@ -12,14 +12,11 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Babel 2.9.0\n"
 
-#: src/components/Alerts.js:10
 msgid "Error processing your request"
 msgstr "Error processing your request"
 
-#: src/components/Alerts.js:20
 msgid "Are you sure you want to delete this item?"
 msgstr "Are you sure you want to delete this item?"
 
-#: src/components/Alerts.js:30
 msgid "Item deleted successfully"
 msgstr "Item deleted successfully"
