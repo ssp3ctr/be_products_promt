@@ -1,0 +1,18 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Your Project 1.0\n"
+"Language: uk\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Product not found"
+msgstr "Продукт не знайдено"
+
+msgid "Error processing your request"
+msgstr "Помилка обробки вашого запиту"
+
+msgid "Error processing your request"
+msgstr "Помилка обробки вашого запиту"
+
+msgid "Item deleted successfully"
+msgstr "Елемент видалено"
